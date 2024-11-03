@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Events;
 
 namespace HeartbeatApp.Helpers
 {
@@ -11,11 +10,6 @@ namespace HeartbeatApp.Helpers
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.File(
-                    path: "logs/heartbeatapp.log",
-                    rollingInterval: RollingInterval.Day,
-                    restrictedToMinimumLevel: LogEventLevel.Information)
                 .CreateLogger();
         }
     }

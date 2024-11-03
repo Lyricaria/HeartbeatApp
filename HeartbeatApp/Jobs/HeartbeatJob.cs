@@ -1,4 +1,5 @@
 ﻿using Quartz;
+using Serilog;
 
 namespace HeartbeatApp.Jobs
 {
@@ -13,7 +14,9 @@ namespace HeartbeatApp.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
+            Log.Debug("HeartbeatJob execution started");
             await _heartbeatEvent.InvokeAsync();
+            Log.Debug("HeartbeatJob execution finished");
         }
     }
 }

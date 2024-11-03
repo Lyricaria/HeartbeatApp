@@ -1,4 +1,6 @@
-﻿using HeartbeatApp.Jobs;
+﻿using HeartbeatApp.Interfaces;
+using HeartbeatApp.Jobs;
+using HeartbeatApp.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
@@ -10,9 +12,9 @@ namespace HeartbeatApp.Helpers
         public static void ConfigureServices(HostBuilderContext hostContext, IServiceCollection services)
         {
             var configuration = hostContext.Configuration;
-            var natsUrl = configuration.GetSection("Nats")["Url"];
+            services.Configure<NatsOptions>(configuration.GetSection("Nats"));
 
-            services.AddSingleton(new HeartbeatEvent(natsUrl));
+            services.AddSingleton<IHeartbeatEvent, HeartbeatEvent>();
 
             //Quartz
             services.AddQuartz(q =>
@@ -30,6 +32,8 @@ namespace HeartbeatApp.Helpers
             });
 
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+            services.AddHostedService<HeartbeatHostedService>();
         }
     }
 }

@@ -1,16 +1,20 @@
-﻿// NATS URL configuration
-using HeartbeatApp;
+﻿using HeartbeatApp;
 using HeartbeatApp.Jobs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quartz;
 
-var natsUrl = "nats://localhost:4222";
-
-// Create the HostBuilder
 var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((hostingContext, config) =>
+    {
+        config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+    })
     .ConfigureServices((hostContext, services) =>
     {
+        // Read NATS URL from configuration
+        var natsUrl = hostContext.Configuration.GetSection("Nats")["Url"];
+
         // Register HeartbeatEvent as a singleton service
         services.AddSingleton(new HeartbeatEvent(natsUrl));
 
@@ -47,5 +51,4 @@ Console.WriteLine("HeartbeatApp is running. Press Ctrl+C to shut down.");
 // Wait for the application to exit
 await host.WaitForShutdownAsync();
 
-// Dispose of the HeartbeatEvent when the application is shutting down
 await heartbeatEvent.DisposeAsync();

@@ -170,22 +170,6 @@ You should see output similar to:
 
 - Configuration Management:
     - Use appsettings.json or environment variables to manage configuration settings.
-    - Avoid hardcoding values in the codebase.
 
 - Connection Management:
     - Maintain persistent connections to the NATS.io server to reduce overhead.
-
-- Asynchronous Operations:
-    - Use async/await to prevent blocking threads and improve scalability.
-
-- Error Handling:
-    - Implement robust exception handling and logging.
-
-- Security:
-    - Configure authentication and TLS encryption for NATS.io communications if required.
-
-- Resource Optimization:
-    - Ensure efficient use of CPU and memory, especially on resource-constrained environments.
-
-- Monitoring:
-    - Utilize monitoring tools to track performance and detect issues promptly.

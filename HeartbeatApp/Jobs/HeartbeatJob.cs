@@ -1,13 +1,14 @@
-﻿using Quartz;
+﻿using HeartbeatApp.Interfaces;
+using Quartz;
 using Serilog;
 
 namespace HeartbeatApp.Jobs
 {
     public class HeartbeatJob : IJob
     {
-        private readonly HeartbeatEvent _heartbeatEvent;
+        private readonly IHeartbeatEvent _heartbeatEvent;
 
-        public HeartbeatJob(HeartbeatEvent heartbeatEvent)
+        public HeartbeatJob(IHeartbeatEvent heartbeatEvent)
         {
             _heartbeatEvent = heartbeatEvent;
         }

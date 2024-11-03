@@ -1,54 +1,33 @@
 ﻿using HeartbeatApp;
-using HeartbeatApp.Jobs;
-using Microsoft.Extensions.Configuration;
+using HeartbeatApp.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Quartz;
+using Serilog;
 
-var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((hostingContext, config) =>
-    {
-        config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-    })
-    .ConfigureServices((hostContext, services) =>
-    {
-        // Read NATS URL from configuration
-        var natsUrl = hostContext.Configuration.GetSection("Nats")["Url"];
+try
+{
+    Log.Information("Starting HeartbeatApp...");
 
-        // Register HeartbeatEvent as a singleton service
-        services.AddSingleton(new HeartbeatEvent(natsUrl));
+    var builder = HostBuilderHelper.CreateHostBuilder(args);
 
-        // Add Quartz services
-        services.AddQuartz(q =>
-        {
-            q.UseMicrosoftDependencyInjectionJobFactory();
+    using var host = builder.Build();
 
-            // Register the job and trigger
-            var jobKey = new JobKey("HeartbeatJob");
+    await host.StartAsync();
 
-            q.AddJob<HeartbeatJob>(opts => opts.WithIdentity(jobKey));
+    var heartbeatEvent = host.Services.GetRequiredService<HeartbeatEvent>();
+    await heartbeatEvent.StartAsync();
 
-            q.AddTrigger(opts => opts
-                .ForJob(jobKey)
-                .WithIdentity("HeartbeatJob-trigger")
-                .WithCronSchedule("0/15 * * * * ?")); // Every 15 seconds
-        });
+    Log.Information("HeartbeatApp is running. Press Ctrl+C to shut down.");
 
-        // Add Quartz.NET hosted service
-        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-    });
+    await host.WaitForShutdownAsync();
 
-// Build and start the host
-using var host = builder.Build();
-await host.StartAsync();
-
-// Start the HeartbeatEvent connection
-var heartbeatEvent = host.Services.GetRequiredService<HeartbeatEvent>();
-await heartbeatEvent.StartAsync();
-
-Console.WriteLine("HeartbeatApp is running. Press Ctrl+C to shut down.");
-
-// Wait for the application to exit
-await host.WaitForShutdownAsync();
-
-await heartbeatEvent.DisposeAsync();
+    await heartbeatEvent.DisposeAsync();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

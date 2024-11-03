@@ -1,6 +1,4 @@
-﻿using HeartbeatApp;
-using HeartbeatApp.Helpers;
-using Microsoft.Extensions.DependencyInjection;
+﻿using HeartbeatApp.Helpers;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
@@ -12,16 +10,7 @@ try
 
     using var host = builder.Build();
 
-    await host.StartAsync();
-
-    var heartbeatEvent = host.Services.GetRequiredService<HeartbeatEvent>();
-    await heartbeatEvent.StartAsync();
-
-    Log.Information("HeartbeatApp is running. Press Ctrl+C to shut down.");
-
-    await host.WaitForShutdownAsync();
-
-    await heartbeatEvent.DisposeAsync();
+    await host.RunAsync();
 }
 catch (Exception ex)
 {

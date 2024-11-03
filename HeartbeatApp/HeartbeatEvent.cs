@@ -1,19 +1,26 @@
-﻿using NATS.Client.Core;
+﻿using HeartbeatApp.Interfaces;
+using HeartbeatApp.Models;
+using Microsoft.Extensions.Options;
+using NATS.Client.Core;
 using Serilog;
 using System.Text;
 
 namespace HeartbeatApp
 {
-    public class HeartbeatEvent : IAsyncDisposable
+    public class HeartbeatEvent : IHeartbeatEvent, IAsyncDisposable
     {
         private readonly NatsConnection _connection;
         private readonly string _subject = "game.heartbeat";
+        private readonly NatsOptions _natsOptions;
 
-        public HeartbeatEvent(string natsUrl)
+        public HeartbeatEvent(IOptions<NatsOptions> natsOptions)
         {
-            var options = NatsOpts.Default with { Url = natsUrl };
+            _natsOptions = natsOptions.Value;
+
+            var options = NatsOpts.Default with { Url = _natsOptions.Url };
             _connection = new NatsConnection(options);
         }
+
 
         public async Task StartAsync()
         {
